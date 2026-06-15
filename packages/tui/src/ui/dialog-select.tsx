@@ -72,7 +72,6 @@ export interface DialogSelectOption<T = any> {
 export type DialogSelectRef<T> = {
   filter: string
   filtered: DialogSelectOption<T>[]
-  selected: DialogSelectOption<T> | undefined
   moveTo(value: T): void
 }
 
@@ -239,9 +238,19 @@ export function DialogSelect<T>(props: DialogSelectProps<T>) {
     const option = selected()
     if (option) props.onMove?.(option)
     if (!scroll) return
-    const target = scroll.getChildren().find((child: { id?: string }) => {
-      return child.id === JSON.stringify(selected()?.value)
-    })
+    let remaining = store.selected
+    let index = 0
+    // Locate the row by position because a unique renderable ID cannot currently be ensured.
+    for (const [category, options] of grouped()) {
+      if (category) index++
+      if (remaining < options.length) {
+        index += remaining
+        break
+      }
+      index += options.length
+      remaining -= options.length
+    }
+    const target = scroll.getChildren()[index]
     if (!target) return
     const y = target.y - scroll.y
     if (center) {
@@ -409,9 +418,6 @@ export function DialogSelect<T>(props: DialogSelectProps<T>) {
     get filtered() {
       return filtered()
     },
-    get selected() {
-      return selected()
-    },
     moveTo(value) {
       const index = flat().findIndex((option) => isDeepEqual(option.value, value))
       if (index >= 0) moveTo(index, true)
@@ -557,7 +563,6 @@ export function DialogSelect<T>(props: DialogSelectProps<T>) {
                       const current = createMemo(() => isDeepEqual(option.value, props.current))
                       return (
                         <box
-                          id={JSON.stringify(option.value)}
                           flexDirection="column"
                           position="relative"
                           onMouseMove={() => {
@@ -673,7 +678,7 @@ function Option(props: {
 
   return (
     <>
-      <Show when={props.current}>
+      <Show when={props.current && !props.gutter}>
         <text flexShrink={0} fg={text()} marginRight={0}>
           ●
         </text>
