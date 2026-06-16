@@ -30,6 +30,7 @@ import { Dynamic } from "solid-js/web"
 import { CommandProvider } from "@/context/command"
 import { CommentsProvider } from "@/context/comments"
 import { FileProvider } from "@/context/file"
+import { MbmAuthGate, MbmAuthProvider } from "@/auth/mbm-auth"
 import { ServerSDKProvider } from "@/context/server-sdk"
 import { ServerSyncProvider } from "@/context/server-sync"
 import { GlobalProvider } from "@/context/global"
@@ -433,34 +434,38 @@ export function AppInterface(props: {
   )
 
   return (
-    <ServerProvider
-      defaultServer={props.defaultServer}
-      canonicalLocalServer={props.canonicalLocalServer}
-      servers={props.servers}
-    >
-      <GlobalProvider>
-        <ConnectionGate disableHealthCheck={props.disableHealthCheck}>
-          <Dynamic
-            component={props.router ?? Router}
-            root={(routerProps) => (
-              <TabsProvider>
-                <ServerShell>{routerProps.children}</ServerShell>
-              </TabsProvider>
-            )}
-          >
-            <Route component={SelectedServerLayout}>
-              <Route path="/" component={HomeRoute} />
-              <Route path="/:dir" component={DirectoryLayout}>
-                <Route path="/" component={() => <Navigate href="session" />} />
-                <Route path="/session/:id?" component={SessionRoute} />
-              </Route>
-            </Route>
-            <Route component={DraftServerLayout}>
-              <Route path="/new-session" component={DraftRoute} />
-            </Route>
-          </Dynamic>
-        </ConnectionGate>
-      </GlobalProvider>
-    </ServerProvider>
+    <MbmAuthProvider>
+      <MbmAuthGate>
+        <ServerProvider
+          defaultServer={props.defaultServer}
+          canonicalLocalServer={props.canonicalLocalServer}
+          servers={props.servers}
+        >
+          <GlobalProvider>
+            <ConnectionGate disableHealthCheck={props.disableHealthCheck}>
+              <Dynamic
+                component={props.router ?? Router}
+                root={(routerProps) => (
+                  <TabsProvider>
+                    <ServerShell>{routerProps.children}</ServerShell>
+                  </TabsProvider>
+                )}
+              >
+                <Route component={SelectedServerLayout}>
+                  <Route path="/" component={HomeRoute} />
+                  <Route path="/:dir" component={DirectoryLayout}>
+                    <Route path="/" component={() => <Navigate href="session" />} />
+                    <Route path="/session/:id?" component={SessionRoute} />
+                  </Route>
+                </Route>
+                <Route component={DraftServerLayout}>
+                  <Route path="/new-session" component={DraftRoute} />
+                </Route>
+              </Dynamic>
+            </ConnectionGate>
+          </GlobalProvider>
+        </ServerProvider>
+      </MbmAuthGate>
+    </MbmAuthProvider>
   )
 }

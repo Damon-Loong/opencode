@@ -1,0 +1,385 @@
+.mbm-login-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: grid;
+  place-items: center;
+  padding: 18px;
+  background: rgba(0, 0, 0, 0.82);
+  backdrop-filter: blur(12px);
+}
+
+.mbm-login-panel {
+  position: relative;
+  width: min(92vw, 640px);
+  overflow: hidden;
+  border-radius: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  background: linear-gradient(180deg, #080a0e 0%, #000 42%, #000 100%);
+  color: #fff;
+  box-shadow: 0 28px 90px rgba(0, 0, 0, 0.72);
+  animation: mbm-login-panel-in 0.82s cubic-bezier(0.2, 0.72, 0.2, 1) both;
+}
+
+.mbm-login-hero {
+  position: relative;
+  min-height: 260px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: flex-start;
+  gap: 28px;
+  padding: 46px 64px 38px;
+  background:
+    radial-gradient(circle at 84% 28%, rgba(74, 134, 255, 0.26), transparent 32%),
+    linear-gradient(130deg, rgba(255, 255, 255, 0.035), rgba(74, 134, 255, 0.08) 72%, rgba(74, 134, 255, 0.16)),
+    #07080a;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.mbm-login-hero::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(90deg, transparent 0%, rgba(74, 134, 255, 0.18) 48%, transparent 100%);
+  opacity: 0.44;
+  transform: translateX(-78%) skewX(-18deg);
+  animation: mbm-login-sweep 4s ease-in-out infinite;
+}
+
+.mbm-login-hero-grid {
+  position: absolute;
+  inset: 0;
+  opacity: 0.45;
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.07) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.07) 1px, transparent 1px);
+  background-size: 34px 34px;
+  mask-image: linear-gradient(180deg, transparent 0%, #000 14%, #000 86%, transparent 100%);
+}
+
+.mbm-login-logo-row {
+  position: relative;
+  z-index: 2;
+  min-height: 46px;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 14px;
+  animation: mbm-login-reveal-up 1.05s cubic-bezier(0.19, 0.78, 0.22, 1) 0.18s both;
+}
+
+.mbm-login-logo-row strong {
+  color: #fff;
+  font-size: 22px;
+  font-weight: 760;
+  letter-spacing: 0;
+}
+
+.mbm-login-logo-row i {
+  width: 1px;
+  height: 28px;
+  flex: 0 0 auto;
+  background: rgba(255, 255, 255, 0.18);
+}
+
+.mbm-login-logo-mark {
+  display: inline-flex;
+  width: 38px;
+  height: 38px;
+  align-items: center;
+  justify-content: center;
+  border-radius: 9px;
+  border: 1px solid rgba(255, 255, 255, 0.28);
+  background: linear-gradient(180deg, #1ca36c, #0c6f55);
+  color: #fff;
+  font-size: 21px;
+  font-weight: 800;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.18);
+}
+
+.mbm-login-typewriter {
+  position: relative;
+  z-index: 2;
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-start;
+  min-height: 38px;
+  margin-top: 18px;
+}
+
+.mbm-login-typewriter h2 {
+  margin: 0;
+  color: #fff;
+  font-size: 36px;
+  font-weight: 700;
+  letter-spacing: 0;
+  line-height: 1.25;
+  white-space: nowrap;
+  animation: mbm-login-reveal-up 1.16s cubic-bezier(0.19, 0.78, 0.22, 1) 0.42s both;
+}
+
+.mbm-login-typewriter i {
+  width: 2px;
+  height: 31px;
+  margin-left: 4px;
+  background: #4a86ff;
+  animation: mbm-login-cursor-soft 1.1s ease-out 0.72s both;
+}
+
+.mbm-login-form {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  width: min(76%, 452px);
+  margin: 42px auto 0;
+}
+
+.mbm-login-phone-row {
+  display: block;
+  animation: mbm-login-reveal-up 1.08s cubic-bezier(0.19, 0.78, 0.22, 1) 0.68s both;
+}
+
+.mbm-login-phone-input,
+.mbm-login-code-input {
+  width: 100%;
+  border: 1px solid rgba(255, 255, 255, 0.24);
+  background: rgba(255, 255, 255, 0.045);
+  color: #fff;
+  font-size: 16px;
+  font-weight: 500;
+  letter-spacing: 0;
+  text-align: left;
+  outline: none;
+  transition: border-color 0.18s, box-shadow 0.18s, background-color 0.18s;
+}
+
+.mbm-login-phone-input {
+  height: 58px;
+  border-radius: 10px;
+  padding: 0 18px;
+}
+
+.mbm-login-code-input {
+  height: 48px;
+  border-radius: 8px;
+  padding: 0 14px;
+}
+
+.mbm-login-phone-input::placeholder,
+.mbm-login-code-input::placeholder {
+  color: rgba(255, 255, 255, 0.36);
+}
+
+.mbm-login-phone-input:focus,
+.mbm-login-code-input:focus {
+  border-color: #4a86ff;
+  background: rgba(255, 255, 255, 0.06);
+  box-shadow: 0 0 0 3px rgba(74, 134, 255, 0.18);
+}
+
+.mbm-login-code-field {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 92px;
+  gap: 12px;
+  align-items: center;
+  animation: mbm-login-reveal-up 0.98s cubic-bezier(0.19, 0.78, 0.22, 1) both;
+}
+
+.mbm-login-resend-btn {
+  height: 48px;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.32);
+  background: transparent;
+  color: rgba(255, 255, 255, 0.86);
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background-color 0.18s, color 0.18s, border-color 0.18s;
+}
+
+.mbm-login-resend-btn:hover {
+  border-color: #4a86ff;
+  background: rgba(74, 134, 255, 0.12);
+  color: #fff;
+}
+
+.mbm-login-resend-btn:disabled {
+  opacity: 0.42;
+  cursor: not-allowed;
+}
+
+.mbm-login-tip {
+  margin: -10px 0 0;
+  border-radius: 8px;
+  border: 1px solid;
+  padding: 9px 10px;
+  font-size: 12px;
+  font-weight: 500;
+  animation: mbm-login-reveal-up 0.72s cubic-bezier(0.19, 0.78, 0.22, 1) both;
+}
+
+.mbm-login-tip-error {
+  border-color: rgba(248, 113, 113, 0.28);
+  background: rgba(239, 68, 68, 0.1);
+  color: #fecaca;
+}
+
+.mbm-login-tip-notice {
+  border-color: rgba(110, 231, 183, 0.3);
+  background: rgba(16, 185, 129, 0.12);
+  color: #bbf7d0;
+}
+
+.mbm-login-submit-btn {
+  width: 100%;
+  height: 64px;
+  border-radius: 10px;
+  border: 1px solid rgba(74, 134, 255, 0.6);
+  background: #4a86ff;
+  color: #fff;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 19px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background-color 0.18s, color 0.18s, opacity 0.18s;
+  animation: mbm-login-reveal-up 1.08s cubic-bezier(0.19, 0.78, 0.22, 1) 0.9s both;
+}
+
+.mbm-login-submit-btn:hover {
+  background: #5c94ff;
+  color: #fff;
+}
+
+.mbm-login-submit-btn:disabled {
+  opacity: 0.42;
+  cursor: not-allowed;
+}
+
+.mbm-login-bottom-subtitle {
+  margin: 20px 64px 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  color: rgba(255, 255, 255, 0.52);
+  font-size: 13px;
+  line-height: 1.5;
+  text-align: center;
+  animation: mbm-login-reveal-up 1.08s cubic-bezier(0.19, 0.78, 0.22, 1) 1.08s both;
+}
+
+.mbm-login-bottom-subtitle span {
+  width: 10px;
+  height: 10px;
+  flex: 0 0 auto;
+  border-radius: 50%;
+  border: 1px solid rgba(255, 255, 255, 0.9);
+  box-shadow: inset 0 0 0 2px #000;
+  background: #fff;
+}
+
+@keyframes mbm-login-panel-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px) scale(0.992);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes mbm-login-reveal-up {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes mbm-login-sweep {
+  0% {
+    transform: translateX(-78%) skewX(-18deg);
+  }
+  55%,
+  100% {
+    transform: translateX(116%) skewX(-18deg);
+  }
+}
+
+@keyframes mbm-login-cursor-soft {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (max-width: 560px) {
+  .mbm-login-panel {
+    width: min(96vw, 430px);
+  }
+
+  .mbm-login-hero {
+    min-height: 224px;
+    gap: 20px;
+    padding: 36px 26px 28px;
+  }
+
+  .mbm-login-typewriter h2 {
+    font-size: 25px;
+  }
+
+  .mbm-login-logo-row {
+    min-height: 38px;
+    gap: 10px;
+  }
+
+  .mbm-login-form {
+    width: calc(100% - 48px);
+    gap: 20px;
+    margin-top: 32px;
+  }
+
+  .mbm-login-phone-input {
+    height: 54px;
+    font-size: 15px;
+  }
+
+  .mbm-login-submit-btn {
+    height: 56px;
+    font-size: 17px;
+  }
+
+  .mbm-login-bottom-subtitle {
+    margin: 18px 26px 30px;
+    font-size: 12px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mbm-login-panel,
+  .mbm-login-hero::after,
+  .mbm-login-logo-row,
+  .mbm-login-typewriter h2,
+  .mbm-login-typewriter i,
+  .mbm-login-phone-row,
+  .mbm-login-code-field,
+  .mbm-login-tip,
+  .mbm-login-submit-btn,
+  .mbm-login-bottom-subtitle {
+    animation-duration: 1ms;
+    animation-iteration-count: 1;
+    animation-delay: 0ms;
+  }
+}
