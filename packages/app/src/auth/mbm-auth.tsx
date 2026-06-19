@@ -125,8 +125,10 @@ export const { use: useMbmAuth, provider: MbmAuthProvider } = createSimpleContex
             }
           : null,
       )
-      if (session) await refreshAccount()
-      else setAccount(null)
+      if (session) {
+        await refreshAccount()
+        void syncMopcSkills().catch(() => undefined)
+      } else setAccount(null)
     }
 
     const syncMopcSkills = async () => {
