@@ -737,10 +737,10 @@ export const dict = {
   "enterprise.faq.a4":
     "Так. OpenCode не зберігає ваш код або контекст. Вся обробка відбувається локально або через прямі API-виклики.",
 
-  "brand.title": "OpenCode | Бренд",
-  "brand.meta.description": "Рекомендації щодо бренду OpenCode",
+  "brand.title": "mbmcode | Бренд",
+  "brand.meta.description": "Рекомендації щодо бренду mbmcode",
   "brand.heading": "Рекомендації щодо бренду",
-  "brand.subtitle": "Ресурси та матеріали для роботи з брендом OpenCode.",
+  "brand.subtitle": "Ресурси та матеріали для роботи з брендом mbmcode.",
   "brand.downloadAll": "Завантажити всі матеріали",
 
   "changelog.title": "OpenCode | Журнал змін",

@@ -9,7 +9,7 @@ NC='\033[0m' # No Color
 
 usage() {
     cat <<EOF
-OpenCode Installer
+mbmcode Installer
 
 Usage: install.sh [options]
 
@@ -325,7 +325,7 @@ download_with_progress() {
 }
 
 download_and_install() {
-    print_message info "\n${MUTED}Installing ${NC}opencode ${MUTED}version: ${NC}$specific_version"
+    print_message info "\n${MUTED}Installing ${NC}mbmcode ${MUTED}version: ${NC}$specific_version"
     local tmp_dir="${TMPDIR:-/tmp}/opencode_install_$$"
     mkdir -p "$tmp_dir"
 
@@ -346,7 +346,7 @@ download_and_install() {
 }
 
 install_from_binary() {
-    print_message info "\n${MUTED}Installing ${NC}opencode ${MUTED}from: ${NC}$binary_path"
+    print_message info "\n${MUTED}Installing ${NC}mbmcode ${MUTED}from: ${NC}$binary_path"
     cp "$binary_path" "${INSTALL_DIR}/opencode"
     chmod 755 "${INSTALL_DIR}/opencode"
 }
@@ -368,7 +368,7 @@ add_to_path() {
     elif [[ -w $config_file ]]; then
         echo -e "\n# opencode" >> "$config_file"
         echo "$command" >> "$config_file"
-        print_message info "${MUTED}Successfully added ${NC}opencode ${MUTED}to \$PATH in ${NC}$config_file"
+        print_message info "${MUTED}Successfully added ${NC}mbmcode ${MUTED}to \$PATH in ${NC}$config_file"
     else
         print_message warning "Manually add the directory to $config_file (or similar):"
         print_message info "  $command"
@@ -450,7 +450,7 @@ echo -e "${MUTED}█░░█ █░░█ █▀▀▀ █░░█ ${NC}█░
 echo -e "${MUTED}▀▀▀▀ █▀▀▀ ▀▀▀▀ ▀  ▀ ${NC}▀▀▀▀ ▀▀▀▀ ▀▀▀▀ ▀▀▀▀"
 echo -e ""
 echo -e ""
-echo -e "${MUTED}OpenCode includes free models, to start:${NC}"
+echo -e "${MUTED}mbmcode includes free models, to start:${NC}"
 echo -e ""
 echo -e "cd <project>  ${MUTED}# Open directory${NC}"
 echo -e "opencode      ${MUTED}# Run command${NC}"

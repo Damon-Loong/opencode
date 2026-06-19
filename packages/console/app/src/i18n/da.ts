@@ -772,10 +772,10 @@ export const dict = {
   "enterprise.faq.a4":
     "Ja. OpenCode gemmer ikke din kode eller kontekstdata. Al behandling sker lokalt eller via direkte API-kald til din AI-udbyder. Med central konfiguration og SSO-integration forbliver dine data sikre inden for din organisations infrastruktur.",
 
-  "brand.title": "OpenCode | Brand",
-  "brand.meta.description": "OpenCode brandretningslinjer",
+  "brand.title": "mbmcode | Brand",
+  "brand.meta.description": "mbmcode brandretningslinjer",
   "brand.heading": "Brandretningslinjer",
-  "brand.subtitle": "Ressourcer og assets, der hjælper dig med at arbejde med OpenCode-brandet.",
+  "brand.subtitle": "Ressourcer og assets, der hjælper dig med at arbejde med mbmcode-brandet.",
   "brand.downloadAll": "Download alle assets",
 
   "changelog.title": "OpenCode | Changelog",

@@ -182,21 +182,48 @@ function custom(dep: CustomDep): Record<string, CustomLoader> {
         if (input.env.some((item) => env[item])) return true
         return false
       })
-      const ok =
-        hasKey ||
-        Boolean(yield* dep.auth(input.id)) ||
-        Boolean((yield* dep.config()).provider?.["opencode"]?.options?.apiKey)
+      const ok = hasKey || Boolean((yield* dep.config()).provider?.["opencode"]?.options?.apiKey)
 
       if (!ok) {
-        for (const [key, value] of Object.entries(input.models)) {
-          if (value.cost.input === 0) continue
-          delete input.models[key]
-        }
+        return { autoload: false }
       }
 
       return {
         autoload: Object.keys(input.models).length > 0,
-        options: ok ? {} : { apiKey: "public" },
+        options: {},
+      }
+    }),
+    mbm: Effect.fnUntraced(function* (input: Info) {
+      const env = yield* dep.env()
+      const auth = yield* dep.auth(input.id)
+      const configOptions = (yield* dep.config()).provider?.["mbm"]?.options
+      const apiKey =
+        (auth?.type === "api" ? auth.key : undefined) ??
+        env["MBM_API_KEY"] ??
+        mbmStringOption(configOptions, "apiKey") ??
+        mbmStringOption(input.options, "apiKey")
+      const baseURL =
+        mbmStringOption(configOptions, "baseURL") ??
+        mbmStringOption(input.options, "baseURL") ??
+        env["MBM_BASE_URL"] ??
+        env["MBM_API_BASE_URL"] ??
+        "https://afb-api.mbmzone.com/v1"
+      const modelsURL =
+        mbmStringOption(configOptions, "modelsURL") ??
+        mbmStringOption(input.options, "modelsURL") ??
+        env["MBM_MODELS_URL"] ??
+        mbmModelsURL(baseURL)
+
+      return {
+        autoload: !!apiKey,
+        options: {
+          baseURL,
+          ...(apiKey && { apiKey }),
+        },
+        async discoverModels(): Promise<Record<string, Model>> {
+          if (!apiKey) return {}
+          return mbmDiscoverModels(baseURL, apiKey, modelsURL)
+        },
       }
     }),
     openai: () =>
@@ -1253,6 +1280,86 @@ export function fromModelsDevProvider(provider: ModelsDev.Provider): Info {
   }
 }
 
+function mbmStringOption(options: Record<string, unknown> | undefined, key: string) {
+  const value = options?.[key]
+  if (typeof value !== "string") return
+  if (!value.trim()) return
+  return value
+}
+
+function mbmModelsURL(baseURL: string) {
+  const url = baseURL.replace(/\/+$/, "")
+  if (url.endsWith("/v1")) return `${url}/models`
+  return `${url}/v1/models`
+}
+
+async function mbmDiscoverModels(baseURL: string, apiKey: string, modelsURL = mbmModelsURL(baseURL)) {
+  const res = await fetch(modelsURL, {
+    headers: {
+      Authorization: `Bearer ${apiKey}`,
+    },
+  })
+  if (!res.ok) return {}
+
+  const body: unknown = await res.json()
+  const data = isRecord(body) ? body.data : undefined
+  const items = Array.isArray(data) ? data : Array.isArray(body) ? body : []
+
+  return Object.fromEntries(
+    items
+      .filter(isRecord)
+      .filter((item) => typeof item.id === "string")
+      .filter((item) => {
+        const endpoints = item.supported_endpoint_types
+        if (!Array.isArray(endpoints)) return false
+        return endpoints.some((endpoint) => String(endpoint).toLowerCase() === "openai")
+      })
+      .map((item) => {
+        const id = item.id as string
+        const model: Model = {
+          id: ModelV2.ID.make(id),
+          providerID: ProviderV2.ID.make("mbm"),
+          name: typeof item.name === "string" && item.name ? item.name : id,
+          family: typeof item.owned_by === "string" ? item.owned_by : "",
+          api: {
+            id,
+            url: baseURL,
+            npm: "@ai-sdk/openai-compatible",
+          },
+          status: "active",
+          headers: {},
+          options: {},
+          cost: { input: 0, output: 0, cache: { read: 0, write: 0 } },
+          limit: { context: 0, output: 0 },
+          capabilities: {
+            temperature: true,
+            reasoning: false,
+            attachment: false,
+            toolcall: true,
+            input: {
+              text: true,
+              audio: false,
+              image: false,
+              video: false,
+              pdf: false,
+            },
+            output: {
+              text: true,
+              audio: false,
+              image: false,
+              video: false,
+              pdf: false,
+            },
+            interleaved: false,
+          },
+          release_date: "",
+          variants: {},
+        }
+        return [id, model]
+      }),
+  )
+}
+
 function modelSuggestions(provider: Info | undefined, modelID: ModelV2.ID, enableExperimentalModels: boolean) {
   const available = provider
     ? Object.keys(provider.models).filter((id) => {
@@ -1300,6 +1407,18 @@ export const layer = Layer.effect(
         const modelsDev = yield* modelsDevSvc.get()
         const catalog = mapValues(modelsDev, fromModelsDevProvider)
         const database = mapValues(catalog, toPublicInfo)
+        const mbmProvider: Info = {
+          id: ProviderV2.ID.make("mbm"),
+          source: "custom",
+          name: "MBM",
+          env: ["MBM_API_KEY"],
+          options: {
+            baseURL: "https://afb-api.mbmzone.com/v1",
+          },
+          models: {},
+        }
+        catalog[mbmProvider.id] = toPublicInfo(mbmProvider)
+        database[mbmProvider.id] = toPublicInfo(mbmProvider)
 
         const providers: Record<ProviderV2.ID, Info> = {} as Record<ProviderV2.ID, Info>
         const languages = new Map<string, LanguageModelV3>()
@@ -1543,14 +1662,15 @@ export const layer = Layer.effect(
           mergeProvider(providerID, partial)
         }
 
-        const gitlab = ProviderV2.ID.make("gitlab")
-        if (discoveryLoaders[gitlab] && providers[gitlab] && isProviderAllowed(gitlab)) {
+        for (const [id, discoverModels] of Object.entries(discoveryLoaders)) {
+          const providerID = ProviderV2.ID.make(id)
+          if (!providers[providerID] || !isProviderAllowed(providerID)) continue
           yield* Effect.promise(async () => {
             try {
-              const discovered = await discoveryLoaders[gitlab]()
+              const discovered = await discoverModels()
               for (const [modelID, model] of Object.entries(discovered)) {
-                if (!providers[gitlab].models[modelID]) {
-                  providers[gitlab].models[modelID] = model
+                if (!providers[providerID].models[modelID]) {
+                  providers[providerID].models[modelID] = model
                 }
               }
             } catch (e) {}

@@ -769,10 +769,10 @@ export const dict = {
   "enterprise.faq.a4":
     "Yes. OpenCode does not store your code or context data. All processing happens locally or through direct API calls to your AI provider. With central config and SSO integration, your data remains secure within your organization's infrastructure.",
 
-  "brand.title": "OpenCode | Brand",
-  "brand.meta.description": "OpenCode brand guidelines",
+  "brand.title": "mbmcode | Brand",
+  "brand.meta.description": "mbmcode brand guidelines",
   "brand.heading": "Brand guidelines",
-  "brand.subtitle": "Resources and assets to help you work with the OpenCode brand.",
+  "brand.subtitle": "Resources and assets to help you work with the mbmcode brand.",
   "brand.downloadAll": "Download all assets",
 
   "changelog.title": "OpenCode | Changelog",

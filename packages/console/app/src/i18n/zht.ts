@@ -748,10 +748,10 @@ export const dict = {
   "enterprise.faq.a4":
     "是的。OpenCode 不會儲存你的程式碼或上下文資料。所有處理都會在本地或透過直接呼叫你的 AI 供應商 API 完成。透過中央化設定與 SSO 整合，你的資料會安全保留在組織的基礎設施內部。",
 
-  "brand.title": "OpenCode | 品牌",
-  "brand.meta.description": "OpenCode 品牌指南",
+  "brand.title": "mbmcode | 品牌",
+  "brand.meta.description": "mbmcode 品牌指南",
   "brand.heading": "品牌指南",
-  "brand.subtitle": "協助你使用 OpenCode 品牌的資源與素材。",
+  "brand.subtitle": "協助你使用 mbmcode 品牌的資源與素材。",
   "brand.downloadAll": "下載所有素材",
 
   "changelog.title": "OpenCode | 更新日誌",

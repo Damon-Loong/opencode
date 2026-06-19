@@ -185,7 +185,7 @@ export const RunCommand = effectCmd({
       })
       .option("attach", {
         type: "string",
-        describe: "attach to a running opencode server (e.g., http://localhost:4096)",
+        describe: "attach to a running mbmcode server (e.g., http://localhost:4096)",
       })
       .option("password", {
         alias: ["p"],

@@ -5,7 +5,17 @@ import { Switch } from "@opencode-ai/ui/switch"
 import { Tabs } from "@opencode-ai/ui/tabs"
 import { showToast } from "@/utils/toast"
 import { useNavigate } from "@solidjs/router"
-import { type Accessor, createEffect, createMemo, For, type JSXElement, onCleanup, Show } from "solid-js"
+import {
+  type Accessor,
+  createEffect,
+  createMemo,
+  createResource,
+  createSignal,
+  For,
+  type JSXElement,
+  onCleanup,
+  Show,
+} from "solid-js"
 import { createStore } from "solid-js/store"
 import { ServerHealthIndicator, ServerRow } from "@/components/server/server-row"
 import { useLanguage } from "@/context/language"
@@ -16,6 +26,8 @@ import { type ServerHealth } from "@/utils/server-health"
 import { useGlobal } from "@/context/global"
 import { useSettings } from "@/context/settings"
 import { useMcpToggle } from "@/context/mcp"
+import { useServerSDK } from "@/context/server-sdk"
+import { authTokenFromCredentials } from "@/utils/server"
 
 const pluginEmptyMessage = (value: string, file: string): JSXElement => {
   const parts = value.split(file)
@@ -252,6 +264,7 @@ export function StatusPopoverBody(props: { shown: Accessor<boolean> }) {
   const sync = useSync()
   const global = useGlobal()
   const server = useServer()
+  const serverSDK = useServerSDK()
   const platform = usePlatform()
   const dialog = useDialog()
   const language = useLanguage()
@@ -279,9 +292,92 @@ export function StatusPopoverBody(props: { shown: Accessor<boolean> }) {
   const sortedServers = createMemo(() => listServersByHealth(global.servers.list(), server.key, global.servers.health))
   const toggleMcp = useMcpToggle()
   const defaultServer = useDefaultServerKey(platform.getDefaultServer)
+  const [remoteToolPending, setRemoteToolPending] = createSignal("")
+  const [remoteTools, { refetch: refetchRemoteTools }] = createResource(async () => {
+    const current = server.current
+    if (!current) return []
+    const headers = current.http.password
+      ? {
+          Authorization: `Basic ${authTokenFromCredentials({
+            username: current.http.username,
+            password: current.http.password,
+          })}`,
+        }
+      : undefined
+    const res = await (platform.fetch ?? fetch)(`${serverSDK().url}/api/mopc/tools`, {
+      headers: {
+        Accept: "application/json",
+        ...headers,
+      },
+    })
+    if (!res.ok) return []
+    return ((await res.json().catch(() => [])) ?? []) as Array<{
+      tool_id: string
+      tool_name: string
+      tool_description?: string
+      action_name: string
+      enabled: boolean
+    }>
+  })
+  const toggleRemoteTool = async (toolID: string, enabled: boolean) => {
+    if (remoteToolPending()) return
+    const current = server.current
+    if (!current) return
+    const headers = current.http.password
+      ? {
+          Authorization: `Basic ${authTokenFromCredentials({
+            username: current.http.username,
+            password: current.http.password,
+          })}`,
+        }
+      : undefined
+    setRemoteToolPending(toolID)
+    try {
+      const res = await (platform.fetch ?? fetch)(`${serverSDK().url}/api/mopc/tools/${encodeURIComponent(toolID)}/enabled`, {
+        method: "PUT",
+        headers: {
+          Accept: "application/json",
+          "Content-Type": "application/json",
+          ...headers,
+        },
+        body: JSON.stringify({ enabled }),
+      })
+      if (!res.ok) throw new Error(`MOPC request failed (${res.status})`)
+      await refetchRemoteTools()
+      await serverSDK()
+        .client.global.dispose()
+        .catch(() => undefined)
+    } catch (err) {
+      fail(err)
+    } finally {
+      setRemoteToolPending("")
+    }
+  }
   const mcpNames = createMemo(() => Object.keys(sync().data.mcp ?? {}).sort((a, b) => a.localeCompare(b)))
   const mcpStatus = (name: string) => sync().data.mcp?.[name]?.status
-  const mcpConnected = createMemo(() => mcpNames().filter((name) => mcpStatus(name) === "connected").length)
+  const remoteToolItems = createMemo(() =>
+    Object.values(
+      (remoteTools() ?? []).reduce<
+        Record<string, { toolID: string; name: string; description: string; actions: string[]; enabled: boolean }>
+      >((acc, tool) => {
+        acc[tool.tool_id] ??= {
+          toolID: tool.tool_id,
+          name: tool.tool_name,
+          description: tool.tool_description || "",
+          actions: [],
+          enabled: false,
+        }
+        acc[tool.tool_id].enabled = acc[tool.tool_id].enabled || tool.enabled
+        acc[tool.tool_id].actions.push(tool.action_name)
+        return acc
+      }, {}),
+    ).sort((a, b) => a.name.localeCompare(b.name)),
+  )
+  const mcpConnected = createMemo(
+    () =>
+      mcpNames().filter((name) => mcpStatus(name) === "connected").length +
+      remoteToolItems().filter((tool) => tool.enabled).length,
+  )
   const lspItems = createMemo(() => sync().data.lsp ?? [])
   const lspCount = createMemo(() => lspItems().length)
   const plugins = createMemo(() =>
@@ -289,6 +385,13 @@ export function StatusPopoverBody(props: { shown: Accessor<boolean> }) {
   )
   const pluginCount = createMemo(() => plugins().length)
   const pluginEmpty = createMemo(() => pluginEmptyMessage(language.t("dialog.plugins.empty"), "opencode.json"))
+  const openToolStore = () => {
+    const run = ++dialogRun
+    void import("./dialog-mopc-tool-store").then((x) => {
+      if (dialogDead || dialogRun !== run) return
+      dialog.show(() => <x.DialogMopcToolStore onChanged={() => refetchRemoteTools().then(() => undefined)} />)
+    })
+  }
 
   return (
     <div class="flex items-center gap-1 w-[360px] rounded-xl shadow-[var(--shadow-lg-border-base)]">
@@ -392,7 +495,7 @@ export function StatusPopoverBody(props: { shown: Accessor<boolean> }) {
           <div class="flex flex-col px-2 pb-2">
             <div class="flex flex-col p-3 bg-background-base rounded-sm min-h-14">
               <Show
-                when={mcpNames().length > 0}
+                when={mcpNames().length + remoteToolItems().length > 0}
                 fallback={
                   <div class="text-14-regular text-text-base text-center my-auto">{language.t("dialog.mcp.empty")}</div>
                 }
@@ -444,6 +547,46 @@ export function StatusPopoverBody(props: { shown: Accessor<boolean> }) {
                       </button>
                     )
                   }}
+                </For>
+                <For each={remoteToolItems()}>
+                  {(tool) => (
+                    <button
+                      type="button"
+                      class="flex items-center gap-2 w-full min-h-8 pl-3 pr-2 py-1 rounded-md hover:bg-surface-raised-base-hover transition-colors text-left"
+                      onClick={() => {
+                        void toggleRemoteTool(tool.toolID, !tool.enabled)
+                      }}
+                      disabled={remoteToolPending() === tool.toolID}
+                    >
+                      <div
+                        classList={{
+                          "size-1.5 rounded-full shrink-0": true,
+                          "bg-icon-success-base": tool.enabled,
+                          "bg-border-weak-base": !tool.enabled,
+                        }}
+                      />
+                      <span class="flex flex-col min-w-0 flex-1">
+                        <span class="flex items-center gap-2 min-w-0">
+                          <span class="text-14-regular text-text-base truncate">{tool.name}</span>
+                          <span class="text-11-regular text-text-weaker">{language.t("dialog.mcp.remoteTool")}</span>
+                        </span>
+                        <Show when={tool.description || `${tool.actions.length} actions`}>
+                          <span class="text-11-regular text-text-weaker truncate">
+                            {tool.description || `${tool.actions.length} actions`}
+                          </span>
+                        </Show>
+                      </span>
+                      <div onClick={(event) => event.stopPropagation()}>
+                        <Switch
+                          checked={tool.enabled}
+                          disabled={remoteToolPending() === tool.toolID}
+                          onChange={() => {
+                            void toggleRemoteTool(tool.toolID, !tool.enabled)
+                          }}
+                        />
+                      </div>
+                    </button>
+                  )}
                 </For>
               </Show>
             </div>
@@ -497,6 +640,11 @@ export function StatusPopoverBody(props: { shown: Accessor<boolean> }) {
             </div>
           </div>
         </Tabs.Content>
+        <div class="px-2 pb-2">
+          <Button variant="secondary" class="w-full h-8 px-3 py-1.5 justify-center" onClick={openToolStore}>
+            工具商店
+          </Button>
+        </div>
       </Tabs>
     </div>
   )

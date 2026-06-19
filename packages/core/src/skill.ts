@@ -9,6 +9,7 @@ import { FSUtil } from "./fs-util"
 import { PermissionV2 } from "./permission"
 import { AbsolutePath, withStatics } from "./schema"
 import { SkillDiscovery } from "./skill/discovery"
+import { MopcSkill } from "./skill/mopc"
 import { State } from "./state"
 
 export class DirectorySource extends Schema.Class<DirectorySource>("SkillV2.DirectorySource")({
@@ -26,25 +27,41 @@ export class EmbeddedSource extends Schema.Class<EmbeddedSource>("SkillV2.Embedd
   skill: Schema.suspend(() => Info),
 }) {}
 
-export const Source = Schema.Union([DirectorySource, UrlSource, EmbeddedSource]).pipe(
+export class MopcSource extends Schema.Class<MopcSource>("SkillV2.MopcSource")({
+  type: Schema.Literal("mopc"),
+  path: AbsolutePath,
+  skill_id: Schema.String,
+  content_hash: Schema.String,
+}) {}
+
+export const Source = Schema.Union([DirectorySource, UrlSource, EmbeddedSource, MopcSource]).pipe(
   Schema.toTaggedUnion("type"),
   withStatics(() => ({
-    equals: (a: DirectorySource | UrlSource | EmbeddedSource, b: DirectorySource | UrlSource | EmbeddedSource) => {
+    equals: (a: DirectorySource | UrlSource | EmbeddedSource | MopcSource, b: Source) => {
       if (a.type !== b.type) return false
       if (a.type === "directory" && b.type === "directory") return a.path === b.path
       if (a.type === "url" && b.type === "url") return a.url === b.url
       if (a.type === "embedded" && b.type === "embedded") return a.skill.name === b.skill.name
+      if (a.type === "mopc" && b.type === "mopc") return a.skill_id === b.skill_id && a.content_hash === b.content_hash
       return false
     },
-    key: (source: DirectorySource | UrlSource | EmbeddedSource) =>
+    key: (source: DirectorySource | UrlSource | EmbeddedSource | MopcSource) =>
       source.type === "directory"
         ? `directory:${source.path}`
         : source.type === "url"
           ? `url:${source.url}`
-          : `embedded:${source.skill.name}`,
+          : source.type === "embedded"
+            ? `embedded:${source.skill.name}`
+            : `mopc:${source.skill_id}:${source.content_hash}`,
   })),
 )
 export type Source = typeof Source.Type
+
+export class RemoteInfo extends Schema.Class<RemoteInfo>("SkillV2.RemoteInfo")({
+  type: Schema.Literal("mopc"),
+  skill_id: Schema.String,
+  content_hash: Schema.String,
+}) {}
 
 export class Info extends Schema.Class<Info>("SkillV2.Info")({
   name: Schema.String,
@@ -52,6 +69,7 @@ export class Info extends Schema.Class<Info>("SkillV2.Info")({
   slash: Schema.Boolean.pipe(Schema.optional),
   location: AbsolutePath,
   content: Schema.String,
+  remote: RemoteInfo.pipe(Schema.optional),
 }) {}
 
 export const available = (skills: ReadonlyArray<Info>, agent: AgentV2.Info) =>
@@ -101,11 +119,25 @@ export const layer = Layer.effect(
     const load = Effect.fn("SkillV2.load")(function* (source: Source) {
       const skills: Info[] = []
       if (source.type === "embedded") return [source.skill]
-      const directories = source.type === "directory" ? [source.path] : yield* discovery.pull(source.url)
+      const directories =
+        source.type === "directory"
+          ? [source.path]
+          : source.type === "mopc"
+            ? [path.dirname(source.path)]
+            : yield* discovery.pull(source.url)
       for (const directory of directories) {
-        const files = yield* fs
-          .glob("{*.md,**/SKILL.md}", { cwd: directory, absolute: true, include: "file", symlink: true, dot: true })
-          .pipe(Effect.catch(() => Effect.succeed([] as string[])))
+        const files =
+          source.type === "mopc"
+            ? [source.path]
+            : yield* fs
+                .glob("{*.md,**/SKILL.md}", {
+                  cwd: directory,
+                  absolute: true,
+                  include: "file",
+                  symlink: true,
+                  dot: true,
+                })
+                .pipe(Effect.catch(() => Effect.succeed([] as string[])))
         for (const filepath of files.toSorted()) {
           const content = yield* fs.readFileStringSafe(filepath).pipe(Effect.catch(() => Effect.succeed(undefined)))
           if (!content) continue
@@ -127,6 +159,14 @@ export const layer = Layer.effect(
               slash: frontmatter.slash,
               location: AbsolutePath.make(filepath),
               content: markdown.content,
+              remote:
+                source.type === "mopc"
+                  ? new RemoteInfo({
+                      type: "mopc",
+                      skill_id: source.skill_id,
+                      content_hash: source.content_hash,
+                    })
+                  : undefined,
             }),
           )
         }

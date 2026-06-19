@@ -11,6 +11,7 @@ import { ExperimentalApi } from "./groups/experimental"
 import { FileApi } from "./groups/file"
 import { InstanceApi } from "./groups/instance"
 import { McpApi } from "./groups/mcp"
+import { MopcApi } from "./groups/mopc"
 import { PermissionApi } from "./groups/permission"
 import { ProjectApi } from "./groups/project"
 import { ProjectCopyApi } from "./groups/project-copy"
@@ -45,6 +46,7 @@ export const RootHttpApi = HttpApi.make("opencode-root")
   .addHttpApi(ControlApi)
   .addHttpApi(ControlPlaneApi)
   .addHttpApi(GlobalApi)
+  .addHttpApi(MopcApi)
   .middleware(SchemaErrorMiddleware)
   .middleware(Authorization)
 

@@ -766,10 +766,10 @@ export const dict = {
   "enterprise.faq.a4":
     "네. OpenCode는 코드나 컨텍스트 데이터를 저장하지 않습니다. 모든 처리는 로컬에서 이루어지거나 AI 제공자에 대한 직접 API 호출을 통해 이루어집니다. 중앙 설정 및 SSO 통합을 통해 데이터는 조직의 인프라 내에서 안전하게 유지됩니다.",
 
-  "brand.title": "OpenCode | 브랜드",
-  "brand.meta.description": "OpenCode 브랜드 가이드라인",
+  "brand.title": "mbmcode | 브랜드",
+  "brand.meta.description": "mbmcode 브랜드 가이드라인",
   "brand.heading": "브랜드 가이드라인",
-  "brand.subtitle": "OpenCode 브랜드를 활용하는 데 도움이 되는 리소스와 자산입니다.",
+  "brand.subtitle": "mbmcode 브랜드를 활용하는 데 도움이 되는 리소스와 자산입니다.",
   "brand.downloadAll": "모든 자산 다운로드",
 
   "changelog.title": "OpenCode | 변경 내역",

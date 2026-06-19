@@ -72,6 +72,13 @@ export const ModelTooltip: Component<{ model: ModelInfo; latest?: boolean; free?
       ? language.t("model.tooltip.reasoning.allowed")
       : language.t("model.tooltip.reasoning.none")
   }
+  const hasDefaultMetadata = () => props.model.limit.context === 0
+  const showReasoning = () => {
+    if (!hasDefaultMetadata()) return true
+    if (props.model.capabilities?.reasoning) return true
+    return props.model.reasoning === true
+  }
+  const showContext = () => !hasDefaultMetadata()
   const context = () => language.t("model.tooltip.context", { limit: props.model.limit.context.toLocaleString() })
 
   return (
@@ -84,8 +91,12 @@ export const ModelTooltip: Component<{ model: ModelInfo; latest?: boolean; free?
           </div>
         )}
       </Show>
-      <div class="text-12-regular text-text-invert-base">{reasoning()}</div>
-      <div class="text-12-regular text-text-invert-base">{context()}</div>
+      <Show when={showReasoning()}>
+        <div class="text-12-regular text-text-invert-base">{reasoning()}</div>
+      </Show>
+      <Show when={showContext()}>
+        <div class="text-12-regular text-text-invert-base">{context()}</div>
+      </Show>
     </div>
   )
 }

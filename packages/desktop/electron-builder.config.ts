@@ -33,13 +33,13 @@ const channel = (() => {
 })()
 
 const APP_IDS = {
-  dev: "ai.opencode.desktop.dev",
-  beta: "ai.opencode.desktop.beta",
-  prod: "ai.opencode.desktop",
+  dev: "ai.mbmcode.desktop.dev",
+  beta: "ai.mbmcode.desktop.beta",
+  prod: "ai.mbmcode.desktop",
 } as const
 
 const getBase = (appId: string): Configuration => ({
-  artifactName: "opencode-desktop-${os}-${arch}.${ext}",
+  artifactName: "mbmcode-desktop-${os}-${arch}.${ext}",
   directories: {
     output: "dist",
     buildResources: "resources",
@@ -74,7 +74,7 @@ const getBase = (appId: string): Configuration => ({
     sign: true,
   },
   protocols: {
-    name: "OpenCode",
+    name: "MbmCode",
     schemes: ["opencode"],
   },
   win: {
@@ -115,29 +115,29 @@ function getConfig() {
       return {
         ...base,
         appId,
-        productName: "OpenCode Dev",
-        rpm: { packageName: "opencode-dev" },
+        productName: "MbmCode Dev",
+        rpm: { packageName: "mbmcode-dev" },
       }
     }
     case "beta": {
       return {
         ...base,
         appId,
-        productName: "OpenCode Beta",
-        protocols: { name: "OpenCode Beta", schemes: ["opencode"] },
+        productName: "MbmCode Beta",
+        protocols: { name: "MbmCode Beta", schemes: ["opencode"] },
         publish: { provider: "github", owner: "anomalyco", repo: "opencode-beta", channel: "latest" },
-        rpm: { packageName: "opencode-beta" },
+        rpm: { packageName: "mbmcode-beta" },
       }
     }
     case "prod": {
       return {
         ...base,
         appId,
-        productName: "OpenCode",
-        protocols: { name: "OpenCode", schemes: ["opencode"] },
+        productName: "MbmCode",
+        protocols: { name: "MbmCode", schemes: ["opencode"] },
         publish: { provider: "github", owner: "anomalyco", repo: "opencode", channel: "latest" },
         deb: { fpm: [legacyDesktopEntryFpm] },
-        rpm: { packageName: "opencode", fpm: [legacyDesktopEntryFpm] },
+        rpm: { packageName: "mbmcode", fpm: [legacyDesktopEntryFpm] },
       }
     }
   }

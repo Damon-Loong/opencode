@@ -33,6 +33,7 @@ export const Info = Schema.Struct({
   agent: Schema.optional(Schema.String),
   model: Schema.optional(Schema.String),
   source: Schema.optional(Schema.Literals(["command", "mcp", "skill"])),
+  remote: Schema.optional(Schema.Literal(true)),
   // Some command templates are lazy promises from MCP prompt resolution.
   template: Schema.Unknown,
   subtask: Schema.optional(Schema.Boolean),
@@ -145,6 +146,7 @@ export const layer = Layer.effect(
           name: item.name,
           description: item.description,
           source: "skill",
+          remote: item.remote,
           get template() {
             return item.content
           },

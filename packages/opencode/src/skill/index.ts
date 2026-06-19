@@ -8,6 +8,7 @@ import { EventV2Bridge } from "@/event-v2-bridge"
 import { InstanceState } from "@/effect/instance-state"
 import { Global } from "@opencode-ai/core/global"
 import { SkillPlugin } from "@opencode-ai/core/plugin/skill"
+import { MopcSkill } from "@opencode-ai/core/skill/mopc"
 import { Permission } from "@/permission"
 import { FSUtil } from "@opencode-ai/core/fs-util"
 import { Config } from "@/config/config"
@@ -39,6 +40,7 @@ export const Info = Schema.Struct({
   description: Schema.optional(Schema.String),
   location: Schema.String,
   content: Schema.String,
+  remote: Schema.optional(Schema.Literal(true)),
 })
 export type Info = Schema.Schema.Type<typeof Info>
 
@@ -136,6 +138,7 @@ const add = Effect.fnUntraced(function* (state: State, match: string, events: Ev
     description: md.data.description,
     location: match,
     content: md.content,
+    remote: match.includes(`${path.sep}mopc${path.sep}skills${path.sep}`) ? true : undefined,
   }
 })
 
@@ -224,6 +227,15 @@ const discoverSkills = Effect.fnUntraced(function* (
     for (const dir of pulledDirs) {
       yield* scan(state, dir, SKILL_PATTERN)
     }
+  }
+
+  const mopcManifests = yield* MopcSkill.manifests().pipe(
+    Effect.provideService(FSUtil.Service, fsys),
+    Effect.catch(() => Effect.succeed([])),
+  )
+  for (const manifest of mopcManifests) {
+    state.matches.add(manifest.skill_md_path)
+    state.dirs.add(path.dirname(manifest.skill_md_path))
   }
 
   return {

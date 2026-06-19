@@ -15,6 +15,7 @@ export interface SlashCommand {
   keybind?: string
   type: "builtin" | "custom"
   source?: "command" | "mcp" | "skill"
+  remote?: true
 }
 
 type PromptPopoverProps = {
@@ -119,7 +120,9 @@ export const PromptPopover: Component<PromptPopoverProps> = (props) => {
                       <Show when={cmd.type === "custom" && cmd.source !== "command"}>
                         <span class="text-11-regular text-text-subtle px-1.5 py-0.5 bg-surface-base rounded">
                           {cmd.source === "skill"
-                            ? props.t("prompt.slash.badge.skill")
+                            ? cmd.remote
+                              ? props.t("prompt.slash.badge.remoteSkill")
+                              : props.t("prompt.slash.badge.skill")
                             : cmd.source === "mcp"
                               ? props.t("prompt.slash.badge.mcp")
                               : props.t("prompt.slash.badge.custom")}

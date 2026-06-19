@@ -775,10 +775,10 @@ export const dict = {
   "enterprise.faq.a4":
     "Sì. OpenCode non archivia il tuo codice o dati di contesto. Tutto il trattamento avviene localmente o attraverso chiamate API dirette al tuo provider IA. Con configurazione centrale e integrazione SSO, i tuoi dati rimangono sicuri all'interno dell'infrastruttura della tua organizzazione.",
 
-  "brand.title": "OpenCode | Brand",
-  "brand.meta.description": "Linee guida del brand OpenCode",
+  "brand.title": "mbmcode | Brand",
+  "brand.meta.description": "Linee guida del brand mbmcode",
   "brand.heading": "Linee guida del brand",
-  "brand.subtitle": "Risorse e asset per aiutarti a lavorare con il brand OpenCode.",
+  "brand.subtitle": "Risorse e asset per aiutarti a lavorare con il brand mbmcode.",
   "brand.downloadAll": "Scarica tutti gli asset",
 
   "changelog.title": "OpenCode | Changelog",

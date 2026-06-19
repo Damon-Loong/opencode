@@ -7,6 +7,7 @@ import { Effect, Layer, Schema } from "effect"
 import { FSUtil } from "../fs-util"
 import { PluginBoot } from "../plugin/boot"
 import { SkillV2 } from "../skill"
+import { MopcSkill } from "../skill/mopc"
 import { PermissionV2 } from "../permission"
 import { Tool } from "./tool"
 import { Tools } from "./tools"
@@ -83,6 +84,9 @@ export const layer = Layer.effectDiscard(
                   agent: context.agent,
                   source: { type: "tool", messageID: context.assistantMessageID, callID: context.toolCallID },
                 })
+                if (skill.remote?.type === "mopc") {
+                  yield* MopcSkill.bill(skill.remote, context).pipe(Effect.provideService(FSUtil.Service, fs))
+                }
                 const directory = path.dirname(skill.location)
                 const files =
                   path.basename(skill.location) === "SKILL.md"

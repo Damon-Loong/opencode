@@ -776,10 +776,10 @@ export const dict = {
   "enterprise.faq.a4":
     "Tak. OpenCode nie przechowuje Twojego kodu ani danych kontekstowych. Całe przetwarzanie odbywa się lokalnie lub poprzez bezpośrednie wywołania API do Twojego dostawcy AI. Dzięki centralnej konfiguracji i integracji SSO, Twoje dane pozostają bezpieczne w infrastrukturze Twojej organizacji.",
 
-  "brand.title": "OpenCode | Marka",
-  "brand.meta.description": "Wytyczne marki OpenCode",
+  "brand.title": "mbmcode | Marka",
+  "brand.meta.description": "Wytyczne marki mbmcode",
   "brand.heading": "Wytyczne marki",
-  "brand.subtitle": "Zasoby i aktywa, które pomogą Ci pracować z marką OpenCode.",
+  "brand.subtitle": "Zasoby i aktywa, które pomogą Ci pracować z marką mbmcode.",
   "brand.downloadAll": "Pobierz wszystkie zasoby",
 
   "changelog.title": "OpenCode | Dziennik zmian",

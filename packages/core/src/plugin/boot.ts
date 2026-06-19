@@ -26,6 +26,7 @@ import { ModelsDevPlugin } from "./models-dev"
 import { ProviderPlugins } from "./provider"
 import { SkillV2 } from "../skill"
 import { Reference } from "../reference"
+import { MopcSkillPlugin } from "./skill/mopc"
 
 type Plugin = {
   id: PluginV2.ID
@@ -101,6 +102,7 @@ export const layer = Layer.effect(
       yield* add(AgentPlugin.Plugin)
       yield* add(CommandPlugin.Plugin)
       yield* add(SkillPlugin.Plugin)
+      yield* add(MopcSkillPlugin.Plugin)
       for (const item of ProviderPlugins) {
         yield* add(item)
       }

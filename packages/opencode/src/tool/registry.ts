@@ -52,6 +52,7 @@ import { BackgroundJob } from "@/background/job"
 import { RuntimeFlags } from "@/effect/runtime-flags"
 import { ProviderV2 } from "@opencode-ai/core/provider"
 import { ModelV2 } from "@opencode-ai/core/model"
+import { MopcTool } from "@opencode-ai/core/mopc/tool"
 
 export function webSearchEnabled(providerID: ProviderV2.ID, flags = { exa: false, parallel: false }) {
   return providerID === ProviderV2.ID.opencode || flags.exa || flags.parallel
@@ -88,6 +89,7 @@ export const layer = Layer.effect(
     const agents = yield* Agent.Service
     const truncate = yield* Truncate.Service
     const flags = yield* RuntimeFlags.Service
+    const fsutil = yield* FSUtil.Service
 
     const invalid = yield* InvalidTool
     const task = yield* TaskTool
@@ -265,7 +267,13 @@ export const layer = Layer.effect(
     })
 
     const tools: Interface["tools"] = Effect.fn("ToolRegistry.tools")(function* (input) {
-      const filtered = (yield* all()).filter((tool) => {
+      const remote = (
+        yield* MopcTool.definitions().pipe(
+          Effect.provideService(FSUtil.Service, fsutil),
+          Effect.catch(() => Effect.succeed([])),
+        )
+      ).map((item) => mopcToolDef(item))
+      const filtered = [...(yield* all()), ...remote].filter((tool) => {
         if (tool.id === WebSearchTool.id) {
           return webSearchEnabled(input.providerID, { exa: flags.enableExa, parallel: flags.enableParallel })
         }
@@ -305,6 +313,53 @@ export const layer = Layer.effect(
         { concurrency: "unbounded" },
       )
     })
+
+    function mopcToolDef(item: MopcTool.Definition): Tool.Def {
+      return {
+        id: item.id,
+        description: [
+          item.description,
+          `Remote MOPC tool: ${item.tool_name} / ${item.action_name}. Use when this remote tool can directly satisfy the user's request.`,
+        ].join("\n"),
+        parameters: Schema.Unknown,
+        jsonSchema: jsonSchemaObject(item.input_schema),
+        execute: (args, ctx) =>
+          Effect.gen(function* () {
+            yield* ctx.ask({
+              permission: item.id,
+              patterns: [item.tool_id, item.action_id],
+              always: [item.tool_id, item.action_id],
+              metadata: {
+                tool: item.tool_name,
+                action: item.action_name,
+              },
+            })
+            const output = yield* MopcTool.run(item, {
+              arguments: args,
+              conversation_id: ctx.sessionID,
+              message_id: ctx.messageID,
+              tool_call_id: ctx.callID,
+            }).pipe(
+              Effect.provideService(FSUtil.Service, fsutil),
+              Effect.catch((error) => Effect.die(new Error(error.message))),
+            )
+            const info = yield* agent.get(ctx.agent)
+            const truncated = yield* truncate.output(output, {}, info)
+            return {
+              title: `${item.tool_name}: ${item.action_name}`,
+              output: truncated.content,
+              metadata: {
+                remote: true,
+                type: "mopc_tool",
+                toolID: item.tool_id,
+                actionID: item.action_id,
+                truncated: truncated.truncated,
+                ...(truncated.truncated && { outputPath: truncated.outputPath }),
+              },
+            }
+          }),
+      }
+    }
 
     const named: Interface["named"] = Effect.fn("ToolRegistry.named")(function* () {
       const s = yield* InstanceState.get(state)
@@ -360,6 +415,15 @@ function legacyJsonSchema(entries: [string, unknown][]): JSONSchema7 {
     properties,
     required: Object.keys(properties),
   }
+}
+
+function jsonSchemaObject(input: Record<string, unknown>): JSONSchema7 {
+  if (input.type === "object") return input as JSONSchema7
+  return {
+    ...input,
+    type: "object",
+    properties: isJsonSchemaObject(input.properties) ? input.properties : {},
+  } as JSONSchema7
 }
 
 function zodJsonSchema(schema: z.ZodType): JSONSchema7 {

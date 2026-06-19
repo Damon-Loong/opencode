@@ -40,6 +40,7 @@ import { useGlobal } from "@/context/global"
 import { decode64 } from "@/utils/base64"
 import { ServerConnection, useServer } from "@/context/server"
 import { tabHref, useTabs, type Tab } from "@/context/tabs"
+import { MbmUserMenu } from "@/auth/mbm-user-menu"
 import "./titlebar.css"
 
 type TauriDesktopWindow = {
@@ -738,6 +739,7 @@ function TitlebarV2Right(props: { state: TitlebarV2RightState }) {
       <Show when={props.state.update.visible}>
         <TitlebarUpdateIconButton state={props.state.update} />
       </Show>
+      <MbmUserMenu />
       <div id="opencode-titlebar-right" class="flex shrink-0 items-center justify-end gap-0" />
     </div>
   )

@@ -766,10 +766,10 @@ export const dict = {
   "enterprise.faq.a4":
     "نعم. لا يقوم OpenCode بتخزين الكود أو بيانات السياق. تتم جميع المعالجة محليًا أو عبر استدعاءات API مباشرة إلى مزود الذكاء الاصطناعي لديك. مع التكوين المركزي وتكامل SSO، تظل بياناتك آمنة داخل البنية التحتية لمؤسستك.",
 
-  "brand.title": "OpenCode | العلامة التجارية",
-  "brand.meta.description": "إرشادات العلامة التجارية لـ OpenCode",
+  "brand.title": "mbmcode | العلامة التجارية",
+  "brand.meta.description": "إرشادات العلامة التجارية لـ mbmcode",
   "brand.heading": "إرشادات العلامة التجارية",
-  "brand.subtitle": "موارد وأصول لمساعدتك في العمل مع العلامة التجارية لـ OpenCode.",
+  "brand.subtitle": "موارد وأصول لمساعدتك في العمل مع العلامة التجارية لـ mbmcode.",
   "brand.downloadAll": "تنزيل جميع الأصول",
 
   "changelog.title": "OpenCode | سجل التغييرات",

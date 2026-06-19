@@ -47,6 +47,7 @@ import { useSettings } from "@/context/settings"
 import { ServerRowMenu } from "@/components/server/server-row-menu"
 import { ServerHealthIndicator } from "@/components/server/server-row"
 import { type ServerHealth } from "@/utils/server-health"
+import { OFFICIAL_WEBSITE_URL } from "@/components/windows-app-menu"
 
 const HOME_SESSION_LIMIT = 64
 const HOME_ROW_LAYOUT =
@@ -360,7 +361,7 @@ function HomeDesign() {
           clearNotifications={clearNotifications}
           unseenCount={unseenCount}
           openSettings={openSettings}
-          openHelp={() => platform.openLink("https://opencode.ai/desktop-feedback")}
+          openHelp={() => platform.openLink(OFFICIAL_WEBSITE_URL)}
           language={language}
         />
 

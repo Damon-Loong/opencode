@@ -779,10 +779,10 @@ export const dict = {
   "enterprise.faq.a4":
     "Evet. OpenCode kodunuzu veya bağlam verilerinizi saklamaz. Tüm işleme yerel olarak ya da AI sağlayıcınıza doğrudan API çağrıları ile gerçekleştirilir. Merkezileştirilmiş konfigürasyon ve SSO entegrasyonu ile verileriniz kurumunuzun altyapısı içinde güvende kalır.",
 
-  "brand.title": "OpenCode | Marka",
-  "brand.meta.description": "OpenCode marka kılavuzu",
+  "brand.title": "mbmcode | Marka",
+  "brand.meta.description": "mbmcode marka kılavuzu",
   "brand.heading": "Marka kılavuzu",
-  "brand.subtitle": "OpenCode markası ile çalışmanıza yardımcı olacak kaynaklar ve varlıklar.",
+  "brand.subtitle": "mbmcode markası ile çalışmanıza yardımcı olacak kaynaklar ve varlıklar.",
   "brand.downloadAll": "Tüm varlıkları indir",
 
   "changelog.title": "OpenCode | Değişiklik günlüğü",

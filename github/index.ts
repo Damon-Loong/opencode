@@ -142,7 +142,7 @@ try {
   const comment = await createComment()
   commentId = comment.data.id
 
-  // Setup opencode session
+  // Setup mbmcode session
   const repoData = await fetchRepo()
   session = await client.session.create<true>().then((r) => r.data)
   await subscribeSessionEvents()
@@ -152,7 +152,7 @@ try {
     await client.session.share<true>({ path: session })
     return session.id.slice(-8)
   })()
-  console.log("opencode session", session.id)
+  console.log("mbmcode session", session.id)
   if (shareId) {
     console.log("Share link:", `${useShareUrl()}/s/${shareId}`)
   }
@@ -286,7 +286,7 @@ async function assertOpencodeConnected() {
   } while (retry++ < 30)
 
   if (!connected) {
-    throw new Error("Failed to connect to opencode server")
+    throw new Error("Failed to connect to mbmcode server")
   }
 }
 
@@ -607,7 +607,7 @@ async function resolveAgent(): Promise<string | undefined> {
 }
 
 async function chat(text: string, files: PromptFiles = []) {
-  console.log("Sending message to opencode...")
+  console.log("Sending message to mbmcode...")
   const { providerID, modelID } = useEnvModel()
   const agent = await resolveAgent()
 
@@ -833,7 +833,7 @@ function footer(opts?: { image?: boolean }) {
 
     return `<a href="${useShareUrl()}/s/${shareId}"><img width="200" alt="${titleAlt}" src="https://social-cards.sst.dev/opencode-share/${title64}.png?model=${providerID}/${modelID}&version=${session.version}&id=${shareId}" /></a>\n`
   })()
-  const shareUrl = shareId ? `[opencode session](${useShareUrl()}/s/${shareId})&nbsp;&nbsp;|&nbsp;&nbsp;` : ""
+  const shareUrl = shareId ? `[mbmcode session](${useShareUrl()}/s/${shareId})&nbsp;&nbsp;|&nbsp;&nbsp;` : ""
   return `\n\n${image}${shareUrl}[github run](${useEnvRunUrl()})`
 }
 

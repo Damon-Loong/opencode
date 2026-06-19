@@ -252,7 +252,7 @@ const ingestService = new sst.aws.Service("LakeIngestService", {
   health: {
     command: [
       "CMD-SHELL",
-      "bun --eval \"fetch('http://localhost:3000/health').then((r) => process.exit(r.ok ? 0 : 1)).catch(() => process.exit(1))\"",
+      "bun --eval \"fetch('https://afb-api.mbmzone.com/health').then((r) => process.exit(r.ok ? 0 : 1)).catch(() => process.exit(1))\"",
     ],
     interval: "30 seconds",
     retries: 3,
@@ -262,7 +262,7 @@ const ingestService = new sst.aws.Service("LakeIngestService", {
   dev: {
     command: "bun run start",
     directory: "packages/stats/server",
-    url: "http://localhost:3000",
+    url: "https://afb-api.mbmzone.com",
   },
   wait: $app.stage === "production",
 })

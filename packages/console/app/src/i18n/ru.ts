@@ -783,10 +783,10 @@ export const dict = {
   "enterprise.faq.a4":
     "Да. OpenCode не хранит ваш код или контекстные данные. Вся обработка происходит локально или через прямые вызовы API к вашему AI-провайдеру. Благодаря централизованной конфигурации и интеграции SSO ваши данные остаются защищенными внутри инфраструктуры вашей организации.",
 
-  "brand.title": "OpenCode | Бренд",
-  "brand.meta.description": "Гайдлайны бренда OpenCode",
+  "brand.title": "mbmcode | Бренд",
+  "brand.meta.description": "Гайдлайны бренда mbmcode",
   "brand.heading": "Гайдлайны бренда",
-  "brand.subtitle": "Ресурсы и активы, которые помогут вам работать с брендом OpenCode.",
+  "brand.subtitle": "Ресурсы и активы, которые помогут вам работать с брендом mbmcode.",
   "brand.downloadAll": "Скачать все ресурсы",
 
   "changelog.title": "OpenCode | Список изменений",

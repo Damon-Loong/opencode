@@ -769,10 +769,10 @@ export const dict = {
   "enterprise.faq.a4":
     "ใช่ OpenCode ไม่จัดเก็บโค้ดหรือข้อมูลบริบทของคุณ การประมวลผลทั้งหมดเกิดขึ้นในเครื่องหรือผ่านการเรียก API โดยตรงไปยังผู้ให้บริการ AI ของคุณ ด้วยการตั้งค่าแบบศูนย์กลางและการผสานรวม SSO ข้อมูลของคุณจะยังคงปลอดภัยอยู่ภายในโครงสร้างพื้นฐานขององค์กร",
 
-  "brand.title": "OpenCode | แบรนด์",
-  "brand.meta.description": "แนวทางการใช้แบรนด์ OpenCode",
+  "brand.title": "mbmcode | แบรนด์",
+  "brand.meta.description": "แนวทางการใช้แบรนด์ mbmcode",
   "brand.heading": "แนวทางการใช้แบรนด์",
-  "brand.subtitle": "ทรัพยากรและแอสเซทเพื่อช่วยให้คุณใช้งานแบรนด์ OpenCode",
+  "brand.subtitle": "ทรัพยากรและแอสเซทเพื่อช่วยให้คุณใช้งานแบรนด์ mbmcode",
   "brand.downloadAll": "ดาวน์โหลดแอสเซททั้งหมด",
 
   "changelog.title": "OpenCode | บันทึกการเปลี่ยนแปลง",

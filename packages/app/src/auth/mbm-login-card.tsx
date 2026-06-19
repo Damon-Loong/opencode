@@ -2,7 +2,7 @@ import { createMemo, createSignal, onCleanup, Show } from "solid-js"
 import { loginMbmBySms, type MbmUser, sendMbmSmsLoginCode } from "./mbm-auth-api"
 import "./mbm-login-card.css"
 
-export function MbmLoginCard(props: { onLogin: (user: MbmUser) => void; loading?: boolean }) {
+export function MbmLoginCard(props: { onLogin: (user: MbmUser) => void | Promise<void>; loading?: boolean }) {
   const [phone, setPhone] = createSignal("")
   const [code, setCode] = createSignal("")
   const [error, setError] = createSignal("")
@@ -12,12 +12,15 @@ export function MbmLoginCard(props: { onLogin: (user: MbmUser) => void; loading?
   const [isNewUser, setIsNewUser] = createSignal(false)
   const [countdown, setCountdown] = createSignal(0)
   let timer: ReturnType<typeof setInterval> | undefined
+  let codeInput: HTMLInputElement | undefined
 
   const normalizedPhone = createMemo(() => {
     const digits = phone().replace(/\D/g, "")
     return digits.startsWith("86") && digits.length > 11 ? digits.slice(2, 13) : digits.slice(0, 11)
   })
-  const canSubmit = createMemo(() => !busy() && codeSent() && /^1\d{10}$/.test(normalizedPhone()) && /^\d{4}$/.test(code()))
+  const canSubmit = createMemo(
+    () => !busy() && codeSent() && /^1\d{10}$/.test(normalizedPhone()) && /^\d{4}$/.test(code()),
+  )
 
   const startCountdown = () => {
     setCountdown(60)
@@ -56,6 +59,7 @@ export function MbmLoginCard(props: { onLogin: (user: MbmUser) => void; loading?
       setIsNewUser(nextIsNewUser)
       startCountdown()
       setNotice(nextIsNewUser ? "验证码已发送，首次登录将自动注册" : "验证码已发送，请查收短信")
+      requestAnimationFrame(() => codeInput?.focus())
     } catch (error) {
       setError(error instanceof Error ? error.message : "发送验证码失败，请重试")
     } finally {
@@ -76,7 +80,7 @@ export function MbmLoginCard(props: { onLogin: (user: MbmUser) => void; loading?
     setError("")
     setNotice("")
     try {
-      props.onLogin(await loginMbmBySms({ phone: normalizedPhone(), code: code() }))
+      await props.onLogin(await loginMbmBySms({ phone: normalizedPhone(), code: code() }))
     } catch (error) {
       setError(error instanceof Error ? error.message : "登录失败，请重试")
     } finally {
@@ -127,6 +131,7 @@ export function MbmLoginCard(props: { onLogin: (user: MbmUser) => void; loading?
           <Show when={codeSent()}>
             <div class="mbm-login-code-field">
               <input
+                ref={codeInput}
                 type="text"
                 inputMode="numeric"
                 placeholder="请输入 4 位验证码"
@@ -134,7 +139,12 @@ export function MbmLoginCard(props: { onLogin: (user: MbmUser) => void; loading?
                 onInput={(event) => setCode(event.currentTarget.value.replace(/\D/g, "").slice(0, 4))}
                 class="mbm-login-code-input"
               />
-              <button type="button" onClick={sendCode} disabled={busy() || countdown() > 0} class="mbm-login-resend-btn">
+              <button
+                type="button"
+                onClick={sendCode}
+                disabled={busy() || countdown() > 0}
+                class="mbm-login-resend-btn"
+              >
                 {countdown() > 0 ? `${countdown()}s` : "重新发送"}
               </button>
             </div>

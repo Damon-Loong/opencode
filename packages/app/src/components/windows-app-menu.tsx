@@ -8,12 +8,59 @@ import { Icon as IconV2 } from "@opencode-ai/ui/v2/icon"
 import { useCommand } from "@/context/command"
 import { DESKTOP_MENU, desktopMenuVisible, type DesktopMenuAction, type DesktopMenuEntry } from "@/desktop-menu"
 import { usePlatform } from "@/context/platform"
+import { useLanguage } from "@/context/language"
+
+const MENU_LABEL_KEYS = {
+  File: "desktop.menu.file",
+  "New Session": "desktop.menu.newSession",
+  "Open Project...": "desktop.menu.openProject",
+  Settings: "desktop.menu.settings",
+  "New Window": "desktop.menu.newWindow",
+  "Close Window": "desktop.menu.closeWindow",
+  Edit: "desktop.menu.edit",
+  Undo: "desktop.menu.undo",
+  Redo: "desktop.menu.redo",
+  Cut: "desktop.menu.cut",
+  Copy: "desktop.menu.copy",
+  Paste: "desktop.menu.paste",
+  Delete: "desktop.menu.delete",
+  "Select All": "desktop.menu.selectAll",
+  View: "desktop.menu.view",
+  "Toggle Sidebar": "desktop.menu.toggleSidebar",
+  "Toggle Terminal": "desktop.menu.toggleTerminal",
+  "Toggle File Tree": "desktop.menu.toggleFileTree",
+  Reload: "desktop.menu.reload",
+  "Toggle Developer Tools": "desktop.menu.toggleDeveloperTools",
+  "Actual Size": "desktop.menu.actualSize",
+  "Zoom In": "desktop.menu.zoomIn",
+  "Zoom Out": "desktop.menu.zoomOut",
+  "Toggle Full Screen": "desktop.menu.toggleFullScreen",
+  Go: "desktop.menu.go",
+  Back: "desktop.menu.back",
+  Forward: "desktop.menu.forward",
+  "Previous Session": "desktop.menu.previousSession",
+  "Next Session": "desktop.menu.nextSession",
+  "Previous Project": "desktop.menu.previousProject",
+  "Next Project": "desktop.menu.nextProject",
+  Window: "desktop.menu.window",
+  Minimize: "desktop.menu.minimize",
+  Maximize: "desktop.menu.maximize",
+  Help: "desktop.menu.help",
+  "mbmcode Documentation": "desktop.menu.documentation",
+  "Support Forum": "desktop.menu.supportForum",
+  "Export Logs...": "desktop.menu.exportLogs",
+  "Share Feedback": "desktop.menu.shareFeedback",
+  "Report a Bug": "desktop.menu.reportBug",
+} as const
+
+export const OFFICIAL_WEBSITE_URL = "https://opc.mbmzone.com"
 
 export function WindowsAppMenu(props: {
   command: ReturnType<typeof useCommand>
   platform: ReturnType<typeof usePlatform>
   variant?: "legacy" | "v2"
 }) {
+  const language = useLanguage()
   let lastFocused: HTMLElement | undefined
 
   const rememberFocus = () => {
@@ -45,6 +92,10 @@ export function WindowsAppMenu(props: {
     }
     if (entry.href) props.platform.openLink(entry.href)
   }
+  const label = (value: string) => {
+    const key = MENU_LABEL_KEYS[value as keyof typeof MENU_LABEL_KEYS]
+    return key ? language.t(key) : value
+  }
 
   return (
     <DropdownMenu gutter={4} modal={false} placement="bottom-start">
@@ -58,7 +109,7 @@ export function WindowsAppMenu(props: {
             variant="ghost-muted"
             size="large"
             icon={<IconV2 name="menu" />}
-            aria-label="OpenCode menu"
+            aria-label="mbmcode menu"
             onPointerDown={rememberFocus}
             onKeyDown={rememberFocus}
           />
@@ -69,7 +120,7 @@ export function WindowsAppMenu(props: {
           icon="menu"
           variant="ghost"
           class="titlebar-icon rounded-md shrink-0"
-          aria-label="OpenCode menu"
+          aria-label="mbmcode menu"
           onPointerDown={rememberFocus}
           onKeyDown={rememberFocus}
         />
@@ -77,9 +128,9 @@ export function WindowsAppMenu(props: {
       <DropdownMenu.Portal>
         <DropdownMenu.Content class="desktop-app-menu">
           <DropdownMenu.Group>
-            <DropdownMenu.GroupLabel class="desktop-app-menu-heading">OpenCode</DropdownMenu.GroupLabel>
-            {DESKTOP_MENU.filter((menu) => desktopMenuVisible(menu, "windows")).map((menu) => (
-              <DesktopMenuSubmenu label={menu.label}>
+            <DropdownMenu.GroupLabel class="desktop-app-menu-heading">mbmcode</DropdownMenu.GroupLabel>
+            {DESKTOP_MENU.filter((menu) => menu.id !== "help" && desktopMenuVisible(menu, "windows")).map((menu) => (
+              <DesktopMenuSubmenu label={label(menu.label)}>
                 {menu.items
                   ?.filter((entry) => desktopMenuVisible(entry, "windows"))
                   .map((entry) =>
@@ -87,7 +138,7 @@ export function WindowsAppMenu(props: {
                       <DropdownMenu.Separator />
                     ) : (
                       <DesktopMenuItem
-                        label={entry.label ?? ""}
+                        label={entry.label ? label(entry.label) : ""}
                         keybind={entry.command ? props.command.keybind(entry.command) : entry.accelerator?.windows}
                         disabled={entry.command ? commandDisabled(entry.command) : false}
                         onSelect={() => runEntry(entry)}
@@ -96,6 +147,11 @@ export function WindowsAppMenu(props: {
                   )}
               </DesktopMenuSubmenu>
             ))}
+            <DropdownMenu.Separator />
+            <DesktopMenuItem
+              label={language.t("desktop.menu.website")}
+              onSelect={() => props.platform.openLink(OFFICIAL_WEBSITE_URL)}
+            />
           </DropdownMenu.Group>
         </DropdownMenu.Content>
       </DropdownMenu.Portal>
